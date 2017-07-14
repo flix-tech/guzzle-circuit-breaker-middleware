@@ -1,0 +1,32 @@
+{
+  "name": "flix-tech/guzzle-circuit-breaker-middleware",
+  "description": "A Guzzle 6 middleware to integrate `ejsmont-artur/php-circuit-breaker`",
+  "type": "library",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Thomas Ploch",
+      "email": "thomas.ploch@flixbus.com"
+    }
+  ],
+  "require": {
+    "guzzlehttp/promises": "~1.2",
+    "psr/http-message": "~1.0",
+    "ejsmont-artur/php-circuit-breaker": "~0.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~6.0",
+    "guzzlehttp/guzzle": "~6.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "FlixTech\\CircuitBreakerMiddleware\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "FlixTech\\CircuitBreakerMiddleware\\Test\\": "test/"
+    }
+  }
+}
