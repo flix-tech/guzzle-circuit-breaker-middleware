@@ -23,14 +23,43 @@ class Middleware
      */
     private $exceptionMap;
 
-    public function __construct(CircuitBreakerInterface $circuitBreaker, callable $exceptionMap = null)
-    {
+    /**
+     * @var callable
+     */
+    private $serviceNameExtractor;
+
+    public function __construct(
+        CircuitBreakerInterface $circuitBreaker,
+        callable $serviceNameExtractor = null,
+        callable $exceptionMap = null
+    ) {
         $this->circuitBreaker = $circuitBreaker;
         $this->exceptionMap = $exceptionMap;
+        $this->serviceNameExtractor = $serviceNameExtractor;
 
         if (!$exceptionMap) {
             $this->exceptionMap = function (): bool {
                 return true;
+            };
+        }
+
+        if (!$serviceNameExtractor) {
+            $this->serviceNameExtractor = function (RequestInterface $request, array $requestOptions): string {
+                $serviceName = '';
+
+                if (\array_key_exists(self::CB_TRANSFER_OPTION_KEY, $requestOptions)) {
+                    $serviceName = $requestOptions[self::CB_TRANSFER_OPTION_KEY];
+                }
+
+                if (!$serviceName) {
+                    $header = $request->getHeader(self::CB_SERVICE_NAME_HEADER);
+
+                    if (0 !== \count($header)) {
+                        $serviceName = $header[0];
+                    }
+                }
+
+                return $serviceName;
             };
         }
     }
@@ -38,7 +67,7 @@ class Middleware
     public function __invoke(callable $handler): callable
     {
         return function (RequestInterface $request, array $requestOptions) use ($handler) {
-            $serviceName = $this->extractServiceName($request, $requestOptions);
+            $serviceName = \call_user_func($this->serviceNameExtractor, $request, $requestOptions);
 
             if (!$serviceName) {
                 return $handler($request, $requestOptions);
@@ -62,7 +91,7 @@ class Middleware
                     return \GuzzleHttp\Promise\promise_for($value);
                 },
                 function ($reason) use ($serviceName) {
-                    if (call_user_func($this->exceptionMap, $reason)) {
+                    if (\call_user_func($this->exceptionMap, $reason)) {
                         $this->circuitBreaker->reportFailure($serviceName);
                     }
 
@@ -70,24 +99,5 @@ class Middleware
                 }
             );
         };
-    }
-
-    private function extractServiceName(RequestInterface $request, array $requestOptions): string
-    {
-        $serviceName = '';
-
-        if (array_key_exists(self::CB_TRANSFER_OPTION_KEY, $requestOptions)) {
-            $serviceName = $requestOptions[self::CB_TRANSFER_OPTION_KEY];
-        }
-
-        if (!$serviceName) {
-            $header = $request->getHeader(self::CB_SERVICE_NAME_HEADER);
-
-            if (0 !== count($header)) {
-                $serviceName = $header[0];
-            }
-        }
-
-        return $serviceName;
     }
 }

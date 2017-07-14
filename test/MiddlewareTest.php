@@ -85,6 +85,34 @@ class MiddlewareTest extends TestCase
     /**
      * @test
      */
+    public function it_will_use_custom_service_name_extractor()
+    {
+        $this->requestMock
+            ->expects($this->never())
+            ->method('getHeader');
+
+        $requestOptions = ['custom_key' => 'service'];
+
+        $this->cbMock
+            ->expects($this->once())
+            ->method('isAvailable')
+            ->with('service');
+
+        (new Middleware(
+            $this->cbMock,
+            function (RequestInterface $request, array $requestOptions) {
+                return $requestOptions['custom_key'];
+            }
+        ))(
+            function () {
+                return new FulfilledPromise(true);
+            }
+        )($this->requestMock, $requestOptions);
+    }
+
+    /**
+     * @test
+     */
     public function it_will_pass_through_to_handler_when_no_service_name_can_be_extracted()
     {
         $this->requestMock
@@ -222,6 +250,7 @@ class MiddlewareTest extends TestCase
         /** @var \GuzzleHttp\Promise\PromiseInterface $promise */
         $promise = (new Middleware(
             $this->cbMock,
+            null,
             function ($reason) {
                 return !$reason instanceof CircuitIsClosedException;
             })
