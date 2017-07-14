@@ -1,5 +1,7 @@
 # Guzzle 6 Circuit-Breaker Middleware
 
+[![Build Status](https://travis-ci.org/flix-tech/guzzle-circuit-breaker-middleware.svg?branch=master)](https://travis-ci.org/flix-tech/guzzle-circuit-breaker-middleware)
+
 This is a Guzzle 6 middleware that integrates https://github.com/ejsmont-artur/php-circuit-breaker.
 
 ### Contents
