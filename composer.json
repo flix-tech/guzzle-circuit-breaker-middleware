@@ -1,5 +1,6 @@
 {
   "name": "flix-tech/guzzle-circuit-breaker-middleware",
+  "keywords": ["guzzle", "middleware", "circuit breaker", "circuit-breaker", "php", "resilience", "fault-tolerance", "php-circuit-breaker"],
   "description": "A Guzzle 6 middleware to integrate `ejsmont-artur/php-circuit-breaker`",
   "type": "library",
   "minimum-stability": "stable",
